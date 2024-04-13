@@ -1,8 +1,7 @@
 from fastapi import FastAPI
 
+from domain.question import question_router
+
 app = FastAPI()
 
-
-@app.get("/hello")
-def hello():
-    return {"messages": "Hello pybo"}
+app.include_router(question_router.router)
