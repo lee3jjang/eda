@@ -12,12 +12,14 @@ from rest_framework.request import Request
 
 from .models import Product, User
 from .serializers import ProductSerializer
+from .producer import publish
 
 
 class ProductViewSet(ViewSet):
     def list(self, request: Request) -> Response:
         product = Product.objects.all()
         serializer = ProductSerializer(product, many=True)
+        publish()
         return Response(serializer.data)
 
     def create(self, request: Request) -> Response:
