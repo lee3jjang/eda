@@ -12,6 +12,7 @@ from rest_framework.request import Request
 
 from .models import Product, User
 from .serializers import ProductSerializer
+from .producer import publish
 
 
 class ProductViewSet(ViewSet):
@@ -24,6 +25,7 @@ class ProductViewSet(ViewSet):
         serializer = ProductSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
+        publish("product_created", serializer.data)
         return Response(serializer.data, status=HTTP_201_CREATED)
 
     def retrieve(self, request: Request, pk: str) -> Response:
@@ -35,12 +37,14 @@ class ProductViewSet(ViewSet):
         product = Product.objects.get(pk=pk)
         serializer = ProductSerializer(instance=product, data=request.data)
         serializer.is_valid(raise_exception=True)
+        publish("product_updated", serializer.data)
         serializer.save()
         return Response(serializer.data, status=HTTP_202_ACCEPTED)
 
     def destroy(self, request: Request, pk: str) -> Response:
         product = Product.objects.get(pk=pk)
         product.delete()
+        publish("product_deleted", pk)
         return Response(status=HTTP_204_NO_CONTENT)
 
 
