@@ -5,10 +5,20 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    command: "python manage.py runserver 0.0.0.0:8000"
     ports:
       - 8000:8000
     volumes:
       - .:/app
+    depends_on:
+      db:
+        condition: service_healthy
+
+  queue:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: "python consumer.py"
     depends_on:
       - db
 
@@ -19,6 +29,11 @@ services:
       MYSQL_DATABASE: admin
       MYSQL_PASSWORD: root
       MYSQL_ROOT_PASSWORD: root
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 1s
+      retries: 5
     volumes:
       - .dbdata:/var/lib/mysql
     ports:
